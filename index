@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find your table</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================
+  HOW TO CONNECT YOUR GOOGLE SHEET  (do this once)
+  ============================================================
+  1. Your sheet needs exactly 3 columns, in this order, with a header row:
+       First Name | Last Name | Table Number
+     Example:
+       First Name | Last Name | Table Number
+       Jordan     | Lee       | 7
+       Priya      | Patel     | 3
+
+  2. In Google Sheets: File > Share > Publish to web.
+     - Under "Link", choose the specific sheet/tab your guest list is on.
+     - Change the format dropdown from "Web page" to "Comma-separated values (.csv)".
+     - Click Publish.
+     - Copy the link it gives you (it will look like:
+       https://docs.google.com/spreadsheets/d/e/2PACX-xxxxxxxx/pub?output=csv)
+
+  3. Paste that link into SHEET_CSV_URL below, replacing the placeholder text.
+
+  4. Save this file and open it in a browser (or host it anywhere, e.g. GitHub
+     Pages, Netlify). It will fetch the live sheet every time someone opens
+     the page, so you can keep updating table numbers right up to the big day.
+
+  IMPORTANT: "Publish to web" makes the sheet's data readable by anyone with
+  the link (read-only, they can't edit it, and they'd need the exact long
+  link, which is not guessable). Don't publish anything sensitive on that tab.
+  ============================================================
+-->
+
+<style>
+  :root {
+    --rose: #C0392B;
+    --pink-mid: #D9748A;
+    --ink: #4A2530;
+    --muted: #B79399;
+    --bg: #FFFBF8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    position: relative;
+    overflow: hidden;
+    max-width: 540px;
+    width: 100%;
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 3rem 1.75rem;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(74, 37, 48, 0.08);
+  }
+  .flower { position: absolute; }
+  .content { position: relative; z-index: 1; }
+  .eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    color: var(--rose);
+    margin: 0 0 6px;
+    line-height: 1.4;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--ink);
+    margin: 0 0 28px;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+    max-width: 340px;
+    margin: 0 auto 8px;
+  }
+  #nameInput {
+    flex: 1;
+    height: 44px;
+    border-radius: 22px;
+    border: 1px solid #EAC4C9;
+    background: #FFFFFF;
+    padding: 0 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+  }
+  #nameInput:focus { border-color: var(--rose); }
+  #findBtn {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 22px;
+    border: 1px solid var(--rose);
+    background: var(--rose);
+    color: #FFFBF8;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  #findBtn:hover { background: #A83226; }
+  #findBtn:disabled { opacity: 0.6; cursor: default; }
+  #statusMsg {
+    font-size: 13px;
+    min-height: 18px;
+    margin: 0 0 16px;
+  }
+  #statusMsg.error { color: var(--rose); }
+  #statusMsg.loading { color: var(--muted); }
+  #results { margin-top: 8px; }
+  .result-item {
+    margin: 0 0 20px;
+  }
+  .result-item .prefix {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: #8C5A63;
+    margin: 0 0 4px;
+  }
+  .result-item .table-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 42px;
+    color: var(--rose);
+    margin: 0;
+    line-height: 1.15;
+  }
+  .celebrate {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 6px 0 0;
+  }
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 26px 0 0;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2 class="sr-only">A page where wedding guests can search their name to find their assigned table number.</h2>
+
+  <svg class="flower" style="top:-6px; left:-6px;" width="64" height="64" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <svg class="flower" style="top:14px; right:6px;" width="46" height="46" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#FFFFFF"/>
+    </g>
+    <circle cx="35" cy="35" r="3.5" fill="#E8A0AE"/>
+  </svg>
+
+  <svg class="flower" style="bottom:-10px; left:8px;" width="70" height="70" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#EF8FA0"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#EF8FA0"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F6B9BE"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <svg class="flower" style="bottom:20px; right:-4px;" width="50" height="50" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <svg class="flower" style="top:120px; left:14px;" width="34" height="34" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.6">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(180 35 35)" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(270 35 35)" fill="#FDF0F1"/>
+    </g>
+    <circle cx="35" cy="35" r="3.5" fill="#E8A0AE"/>
+  </svg>
+
+  <svg class="flower" style="top:150px; right:20px;" width="30" height="30" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.6">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(180 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(270 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="3" fill="#C0392B"/>
+  </svg>
+
+  <div class="content">
+    <p class="eyebrow">Welcome to the big fat Indian wedding</p>
+    <h1>Find your table</h1>
+
+    <div class="search-row">
+      <input id="nameInput" type="text" placeholder="Enter your name" autocomplete="off" />
+      <button id="findBtn">Find</button>
+    </div>
+    <p id="statusMsg"></p>
+
+    <div id="results"></div>
+
+    <p class="hint">Search your first name, or first and last name together.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+  // ============================================================
+  // PASTE YOUR PUBLISHED GOOGLE SHEET CSV LINK HERE
+  // ============================================================
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1_ZvRtd3DyjuwzDIJmdGdNLIgW8kEH1siYH_srOFuXCU/edit?gid=0#gid=0";
+
+function getCsvUrl(sheetUrl) {
+  const match = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+
+  if (!match) {
+    throw new Error('Invalid Google Sheet URL');
+  }
+
+  const spreadsheetId = match[1];
+
+  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+}
+
+
+  // ============================================================
+
+  let guestList = [];
+  let dataLoaded = false;
+
+  const nameInput = document.getElementById('nameInput');
+  const findBtn = document.getElementById('findBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const resultsEl = document.getElementById('results');
+
+  function setStatus(text, type) {
+    statusMsg.textContent = text || '';
+    statusMsg.className = type || '';
+  }
+
+  function normalize(str) {
+    return (str || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  async function loadGuestList() {
+    setStatus('Loading the guest list…', 'loading');
+    findBtn.disabled = true;
+    try {
+      const csvUrl = getCsvUrl(SHEET_URL);
+      const response = await fetch(csvUrl, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Fetch failed');
+      const csvText = await response.text();
+      const parsed = Papa.parse(csvText.trim(), { skipEmptyLines: true });
+      const rows = parsed.data;
+
+      guestList = rows
+        .slice(1) // skip header row
+        .filter(row => row.length >= 3 && normalize(row[0]))
+        .map(row => ({
+          first: (row[0] || '').trim(),
+          last: (row[1] || '').trim(),
+          table: (row[2] || '').trim()
+        }));
+
+      dataLoaded = true;
+      setStatus('', '');
+    } catch (err) {
+      setStatus("Couldn't load the guest list. Check your connection and refresh the page.", 'error');
+    } finally {
+      findBtn.disabled = false;
+    }
+  }
+
+  function findGuests(query) {
+    const q = normalize(query);
+    if (!q) return [];
+    const tokenCount = q.split(' ').length;
+
+    if (tokenCount === 1) {
+      // Match on first name only
+      return guestList.filter(g => normalize(g.first) === q);
+    } else {
+      // Match on first + last name together
+      return guestList.filter(g => normalize(g.first + ' ' + g.last) === q);
+    }
+  }
+
+  function renderResults(matches) {
+    resultsEl.innerHTML = '';
+    if (matches.length === 0) return;
+
+    matches.forEach(g => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+
+      const displayName = g.last ? `${g.first} ${g.last}` : g.first;
+      const showNamePrefix = matches.length > 1;
+
+      item.innerHTML = `
+        <p class="prefix">${showNamePrefix ? displayName + ' is seated at' : "You're seated at"}</p>
+        <p class="table-line">Table ${g.table}</p>
+      `;
+      resultsEl.appendChild(item);
+    });
+
+    const celebrate = document.createElement('p');
+    celebrate.className = 'celebrate';
+    celebrate.textContent = "Can't wait to celebrate with you 🌸";
+    resultsEl.appendChild(celebrate);
+  }
+
+  function handleSearch() {
+    const query = nameInput.value;
+    if (!dataLoaded) {
+      setStatus('Still loading the guest list, one moment…', 'loading');
+      return;
+    }
+    if (!normalize(query)) {
+      setStatus('Enter a name first', 'error');
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    const matches = findGuests(query);
+    if (matches.length === 0) {
+      setStatus("Couldn't find that name. Try just your first name, or check the spelling.", 'error');
+      resultsEl.innerHTML = '';
+    } else {
+      setStatus('', '');
+      renderResults(matches);
+    }
+  }
+
+  findBtn.addEventListener('click', handleSearch);
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSearch(); });
+
+  loadGuestList();
+</script>
+
+</body>
+</html>
