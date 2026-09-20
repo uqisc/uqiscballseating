@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Find your table</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -18,17 +18,24 @@
 
   * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--bg);
     font-family: 'Inter', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+    overflow-x: hidden;
   }
 
   .card {
@@ -38,7 +45,7 @@
     width: 100%;
     background: var(--bg);
     border-radius: 16px;
-    padding: 3rem 1.75rem;
+    padding: clamp(2.25rem, 9vw, 3rem) clamp(1.25rem, 6vw, 1.75rem);
     text-align: center;
     box-shadow: 0 8px 30px rgba(74, 37, 48, 0.08);
   }
@@ -55,37 +62,40 @@
   .eyebrow {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 16px;
+    font-size: clamp(14px, 3.8vw, 16px);
     letter-spacing: 0.02em;
     color: var(--rose);
     margin: 0 0 6px;
     line-height: 1.4;
+    padding: 0 8px;
   }
 
   h1 {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 600;
-    font-size: 28px;
+    font-size: clamp(23px, 6.5vw, 28px);
     color: var(--ink);
     margin: 0 0 28px;
   }
 
   .search-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     max-width: 340px;
     margin: 0 auto 8px;
   }
 
   #nameInput {
-    flex: 1;
-    height: 44px;
-    border-radius: 22px;
+    flex: 1 1 180px;
+    min-width: 0;
+    height: 48px;
+    border-radius: 24px;
     border: 1px solid #EAC4C9;
     background: #FFFFFF;
     padding: 0 18px;
     font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--ink);
     outline: none;
   }
@@ -95,20 +105,26 @@
   }
 
   #findBtn {
-    height: 44px;
-    padding: 0 22px;
-    border-radius: 22px;
+    flex: 0 0 auto;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 24px;
     border: 1px solid var(--rose);
     background: var(--rose);
     color: #FFFBF8;
     font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     cursor: pointer;
+    touch-action: manipulation;
   }
 
   #findBtn:hover {
     background: #A83226;
+  }
+
+  #findBtn:active {
+    background: #922B21;
   }
 
   #findBtn:disabled {
@@ -120,6 +136,7 @@
     font-size: 13px;
     min-height: 18px;
     margin: 0 0 16px;
+    padding: 0 8px;
   }
 
   #statusMsg.error {
@@ -141,15 +158,16 @@
   .result-item .prefix {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 17px;
+    font-size: clamp(15px, 4.2vw, 17px);
     color: #8C5A63;
     margin: 0 0 4px;
+    word-wrap: break-word;
   }
 
   .result-item .table-line {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 600;
-    font-size: 42px;
+    font-size: clamp(32px, 10vw, 42px);
     color: var(--rose);
     margin: 0;
     line-height: 1.15;
@@ -175,6 +193,38 @@
     overflow: hidden;
     clip: rect(0,0,0,0);
   }
+
+  /* --- Small phone tuning --- */
+  @media (max-width: 380px) {
+    .card {
+      border-radius: 14px;
+    }
+
+    h1 {
+      margin-bottom: 22px;
+    }
+
+    .search-row {
+      max-width: 100%;
+    }
+
+    #findBtn {
+      padding: 0 20px;
+    }
+  }
+
+  /* Shrink/reposition decorative flowers so they never crowd the text on narrow screens */
+  @media (max-width: 420px) {
+    .flower {
+      transform: scale(0.72);
+    }
+  }
+
+  @media (max-width: 340px) {
+    .flower {
+      transform: scale(0.55);
+    }
+  }
 </style>
 </head>
 
@@ -187,7 +237,7 @@
   </h2>
 
   <!-- Flower 1 -->
-  <svg class="flower" style="top:-6px; left:-6px;" width="64" height="64" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="top:-6px; left:-6px; transform-origin: top left;" width="64" height="64" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#C0392B" stroke-width="1.4">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
@@ -199,7 +249,7 @@
   </svg>
 
   <!-- Flower 2 -->
-  <svg class="flower" style="top:14px; right:6px;" width="46" height="46" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="top:14px; right:6px; transform-origin: top right;" width="46" height="46" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#D9748A" stroke-width="1.4">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#FDF0F1"/>
@@ -211,7 +261,7 @@
   </svg>
 
   <!-- Flower 3 -->
-  <svg class="flower" style="bottom:-10px; left:8px;" width="70" height="70" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="bottom:-10px; left:8px; transform-origin: bottom left;" width="70" height="70" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#D9748A" stroke-width="1.4">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#EF8FA0"/>
@@ -223,7 +273,7 @@
   </svg>
 
   <!-- Flower 4 -->
-  <svg class="flower" style="bottom:20px; right:-4px;" width="50" height="50" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="bottom:20px; right:-4px; transform-origin: bottom right;" width="50" height="50" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#C0392B" stroke-width="1.4">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
@@ -235,7 +285,7 @@
   </svg>
 
   <!-- Flower 5 -->
-  <svg class="flower" style="top:120px; left:14px;" width="34" height="34" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="top:120px; left:14px; transform-origin: top left;" width="34" height="34" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#D9748A" stroke-width="1.6">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#FDF0F1"/>
@@ -246,7 +296,7 @@
   </svg>
 
   <!-- Flower 6 -->
-  <svg class="flower" style="top:150px; right:20px;" width="30" height="30" viewBox="0 0 70 70" aria-hidden="true">
+  <svg class="flower" style="top:150px; right:20px; transform-origin: top right;" width="30" height="30" viewBox="0 0 70 70" aria-hidden="true">
     <g fill="none" stroke="#C0392B" stroke-width="1.6">
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
       <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#F8CFCF"/>
@@ -272,6 +322,8 @@
         type="text"
         placeholder="Enter your name"
         autocomplete="off"
+        autocapitalize="words"
+        enterkeyhint="search"
       />
 
       <button id="findBtn">
