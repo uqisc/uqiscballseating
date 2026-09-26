@@ -247,6 +247,87 @@
     clip: rect(0,0,0,0);
   }
 
+  /* --- Invitation cover --- */
+
+  .invite-card {
+    cursor: pointer;
+    padding: clamp(2.75rem, 10vw, 3.5rem) clamp(1.5rem, 6vw, 2rem);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  .invite-card.opening {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+    pointer-events: none;
+  }
+
+  .invite-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 4px 0 18px;
+  }
+
+  .invite-rule::before,
+  .invite-rule::after {
+    content: "";
+    height: 1px;
+    width: 34px;
+    background: var(--pink-mid);
+    opacity: 0.6;
+  }
+
+  .invite-rule .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--rose);
+  }
+
+  .invite-card .content h1 {
+    margin-bottom: 4px;
+  }
+
+  .invite-details {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    margin: 0 0 32px;
+    line-height: 1.7;
+  }
+
+  .invite-details .venue {
+    color: #8C5A63;
+  }
+
+  .invite-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    animation: invite-pulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes invite-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+
+  #searchCard {
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 0.45s ease 0.12s, transform 0.45s ease 0.12s;
+  }
+
+  #searchCard.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   /* --- Small phone tuning --- */
   @media (max-width: 380px) {
     .card {
@@ -283,7 +364,101 @@
 
 <body>
 
-<div class="card">
+<div class="card invite-card" id="inviteCard">
+
+  <h2 class="sr-only">
+    Tap to open your invitation and search for your table.
+  </h2>
+
+  <!-- Flower 1 -->
+  <svg class="flower" style="top:-6px; left:-6px; transform-origin: top left;" width="64" height="64" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <!-- Flower 2 -->
+  <svg class="flower" style="top:14px; right:6px; transform-origin: top right;" width="46" height="46" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#FFFFFF"/>
+    </g>
+    <circle cx="35" cy="35" r="3.5" fill="#E8A0AE"/>
+  </svg>
+
+  <!-- Flower 3 -->
+  <svg class="flower" style="bottom:-10px; left:8px; transform-origin: bottom left;" width="70" height="70" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#EF8FA0"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#EF8FA0"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F6B9BE"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <!-- Flower 4 -->
+  <svg class="flower" style="bottom:20px; right:-4px; transform-origin: bottom right;" width="50" height="50" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.4">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(72 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(144 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(216 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(288 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="4" fill="#C0392B"/>
+  </svg>
+
+  <!-- Flower 5 -->
+  <svg class="flower" style="top:120px; left:14px; transform-origin: top left;" width="34" height="34" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#D9748A" stroke-width="1.6">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#FDF0F1"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(180 35 35)" fill="#FFFFFF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(270 35 35)" fill="#FDF0F1"/>
+    </g>
+    <circle cx="35" cy="35" r="3.5" fill="#E8A0AE"/>
+  </svg>
+
+  <!-- Flower 6 -->
+  <svg class="flower" style="top:150px; right:20px; transform-origin: top right;" width="30" height="30" viewBox="0 0 70 70" aria-hidden="true">
+    <g fill="none" stroke="#C0392B" stroke-width="1.6">
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(90 35 35)" fill="#F8CFCF"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(180 35 35)" fill="#F6B9BE"/>
+      <path d="M35 10 Q45 20 35 35 Q25 20 35 10 Z" transform="rotate(270 35 35)" fill="#F8CFCF"/>
+    </g>
+    <circle cx="35" cy="35" r="3" fill="#C0392B"/>
+  </svg>
+
+  <div class="content">
+
+    <p class="eyebrow">You're invited to</p>
+
+    <h1>The Big Fat Indian&nbsp;Wedding</h1>
+
+    <div class="invite-rule"><span class="dot"></span></div>
+
+    <p class="invite-details">
+      4th of October<br>
+    </p>
+
+    <p class="invite-hint">Tap to open your invitation</p>
+
+  </div>
+
+</div>
+
+<div class="card" id="searchCard" style="display:none;">
 
   <h2 class="sr-only">
     A page where wedding guests can search their name to find their assigned table number.
@@ -362,7 +537,7 @@
   <div class="content">
 
     <p class="eyebrow">
-      Welcome to the Big Fat Indian Wedding
+      Welcome to the Big Fat Indian wedding
     </p>
 
     <h1>
@@ -469,6 +644,12 @@
 
   const resultsEl =
     document.getElementById("results");
+
+  const inviteCard =
+    document.getElementById("inviteCard");
+
+  const searchCard =
+    document.getElementById("searchCard");
 
 
   // ============================================================
@@ -932,6 +1113,49 @@
 
     }
   );
+
+
+  // ============================================================
+  // OPEN THE INVITATION
+  // ============================================================
+
+  function openInvite() {
+
+    inviteCard.classList.add("opening");
+
+    setTimeout(() => {
+
+      inviteCard.style.display = "none";
+      searchCard.style.display = "block";
+
+      requestAnimationFrame(() => {
+        searchCard.classList.add("visible");
+      });
+
+      nameInput.focus();
+
+    }, 460);
+
+  }
+
+  inviteCard.addEventListener(
+    "click",
+    openInvite
+  );
+
+  inviteCard.addEventListener(
+    "keydown",
+    e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openInvite();
+      }
+    }
+  );
+
+  inviteCard.setAttribute("tabindex", "0");
+  inviteCard.setAttribute("role", "button");
+  inviteCard.setAttribute("aria-label", "Tap to open your invitation");
 
 
   // ============================================================
